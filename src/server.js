@@ -16,7 +16,7 @@ const e621Client = axios.create({
     'Accept-Language': 'en-US,en;q=0.9',
     'Referer': 'https://e621.net/'
   },
-  timeout: 15000,
+  timeout: 30000,
 });
 
 // Middleware
@@ -150,6 +150,13 @@ app.get('/posts', async (req, res) => {
     }
     
     // Generate error page with search bar so user can still navigate
+    let errorMsg = 'Failed to load posts';
+    if (error.code === 'ECONNABORTED') {
+      errorMsg = 'Request timed out. e621 might be slow or temporarily unavailable. Please try again.';
+    } else if (error.response) {
+      errorMsg = `Error: ${error.response.status} - ${error.response.statusText}`;
+    }
+    
     let html = `<!DOCTYPE html>
 <html>
 <head>
@@ -187,8 +194,7 @@ app.get('/posts', async (req, res) => {
   </div>
   
   <div class="error">
-    <strong>Error:</strong> Failed to load posts. ${error.message}
-    ${error.response ? `<br>Status: ${error.response.status}` : ''}
+    <strong>Error:</strong> 
     <br><br>Try again in a moment, or check if e621 is accessible.
   </div>
   
