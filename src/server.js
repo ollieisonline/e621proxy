@@ -1,0 +1,286 @@
+const express = require('express');
+const axios = require('axios');
+const path = require('path');
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// e621 API base URL
+const E621_API = 'https://e621.net';
+
+// Middleware
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public'));
+
+// Set content type for old browsers
+app.use((req, res, next) => {
+  res.setHeader('X-UA-Compatible', 'IE=edge');
+  next();
+});
+
+// Home page - redirect to posts
+app.get('/', (req, res) => {
+  res.redirect('/posts?page=1');
+});
+
+// Search posts
+app.get('/posts', async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+    const tags = req.query.tags || '';
+    
+    let apiUrl = `${E621_API}/posts.json?page=${page}&limit=${limit}`;
+    
+    if (tags) {
+      apiUrl += `&tags=${encodeURIComponent(tags)}`;
+    }
+    
+    const response = await axios.get(apiUrl, {
+      headers: {
+        'User-Agent': 'e621-proxy/1.0'
+      }
+    });
+    
+    const posts = response.data;
+    
+    // Generate simple HTML for old browsers
+    let html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>e621 Proxy - Page ${page}</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 8px; background: #fff; color: #000; }
+    .header { text-align: center; margin-bottom: 10px; padding: 5px; background: #f0f0f0; }
+    .search { margin-bottom: 10px; text-align: center; }
+    .search input { width: 70%; padding: 5px; border: 1px solid #ccc; }
+    .search button { padding: 5px 10px; border: 1px solid #ccc; cursor: pointer; }
+    .post { margin-bottom: 15px; padding: 8px; border: 1px solid #ddd; border-radius: 3px; }
+    .post img { max-width: 100%; height: auto; display: block; margin: 5px 0; }
+    .post .tags { font-size: 12px; color: #666; margin-top: 5px; word-wrap: break-word; }
+    .post .score { font-size: 11px; color: #888; }
+    .pagination { text-align: center; margin: 15px 0; }
+    .pagination a { padding: 5px 10px; margin: 0 3px; border: 1px solid #ccc; text-decoration: none; color: #000; }
+    .pagination a:hover { background: #f0f0f0; }
+    .nav { margin-bottom: 10px; text-align: center; }
+    .nav a { padding: 5px 10px; margin: 0 3px; border: 1px solid #ccc; text-decoration: none; color: #000; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>e621 Proxy</h1>
+  </div>
+  
+  <div class="nav">
+    <a href="/posts?page=1">Home</a>
+    <a href="/search">Search</a>
+    <a href="/random">Random</a>
+  </div>
+  
+  <div class="search">
+    <form action="/posts" method="get">
+      <input type="text" name="tags" placeholder="Search tags..." value="${tags}">
+      <input type="hidden" name="page" value="1">
+      <button type="submit">Search</button>
+    </form>
+  </div>
+`;
+
+    if (posts.length === 0) {
+      html += '<p style="text-align: center;">No posts found.</p>';
+    } else {
+      posts.forEach(post => {
+        const tags = post.tags.general.join(' ') + ' ' + post.tags.artist.join(' ') + ' ' + post.tags.character.join(' ') + ' ' + post.tags.copyright.join(' ');
+        const imageUrl = post.file.url || post.preview.url;
+        const score = post.score.total;
+        const id = post.id;
+        
+        html += `
+  <div class="post">
+    <a href="/post/${id}"><strong>Post #${id}</strong></a> - <span class="score">Score: ${score}</span>
+    <a href="/post/${id}"><img src="${imageUrl}" alt="Post ${id}"></a>
+    <div class="tags">${tags}</div>
+  </div>
+`;
+      });
+    }
+
+    // Pagination
+    html += `
+  <div class="pagination">
+`;
+    if (page > 1) {
+      html += `<a href="/posts?page=${page - 1}&tags=${encodeURIComponent(tags)}">&laquo; Previous</a>`;
+    }
+    html += `<span>Page ${page}</span>`;
+    html += `<a href="/posts?page=${page + 1}&tags=${encodeURIComponent(tags)}">Next &raquo;</a>`;
+    html += `
+  </div>
+`;
+
+    html += `
+  <div class="nav" style="margin-top: 20px;">
+    <a href="/posts?page=1">Home</a>
+    <a href="/search">Search</a>
+    <a href="/random">Random</a>
+  </div>
+  
+  <div style="text-align: center; margin-top: 20px; font-size: 11px; color: #888;">
+    e621 Proxy - Read-only mode
+  </div>
+</body>
+</html>
+`;
+
+    res.send(html);
+  } catch (error) {
+    console.error('Error fetching posts:', error.message);
+    res.status(500).send('<html><body><h1>Error</h1><p>Failed to load posts.</p></body></html>');
+  }
+});
+
+// Single post view
+app.get('/post/:id', async (req, res) => {
+  try {
+    const postId = req.params.id;
+    const response = await axios.get(`${E621_API}/posts/${postId}.json`, {
+      headers: {
+        'User-Agent': 'e621-proxy/1.0'
+      }
+    });
+    
+    const post = response.data;
+    const tags = post.tags.general.join(' ') + ' ' + post.tags.artist.join(' ') + ' ' + post.tags.character.join(' ') + ' ' + post.tags.copyright.join(' ');
+    const imageUrl = post.file.url || post.preview.url;
+    
+    let html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Post #${postId} - e621 Proxy</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 8px; background: #fff; color: #000; }
+    .header { text-align: center; margin-bottom: 10px; padding: 5px; background: #f0f0f0; }
+    .post { margin-bottom: 15px; padding: 8px; border: 1px solid #ddd; border-radius: 3px; }
+    .post img { max-width: 100%; height: auto; display: block; margin: 5px 0; }
+    .post .info { margin-top: 10px; font-size: 12px; }
+    .post .tags { font-size: 12px; color: #666; margin-top: 10px; word-wrap: break-word; }
+    .nav { margin-bottom: 10px; text-align: center; }
+    .nav a { padding: 5px 10px; margin: 0 3px; border: 1px solid #ccc; text-decoration: none; color: #000; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Post #${postId}</h1>
+  </div>
+  
+  <div class="nav">
+    <a href="/posts?page=1">Home</a>
+    <a href="/search">Search</a>
+    <a href="/random">Random</a>
+  </div>
+  
+  <div class="post">
+    <strong>Post #${postId}</strong>
+    <div class="info">
+      Score: ${post.score.total} | Rating: ${post.rating} | Uploaded: ${new Date(post.created_at).toLocaleDateString()}<br>
+      Size: ${post.file.width}x${post.file.height} | ${post.file.size} bytes | ${post.file.ext}
+    </div>
+    <img src="${imageUrl}" alt="Post ${postId}">
+    <div class="tags">Tags: ${tags}</div>
+  </div>
+  
+  <div class="nav" style="margin-top: 20px;">
+    <a href="/posts?page=1">Home</a>
+    <a href="/search">Search</a>
+    <a href="/random">Random</a>
+  </div>
+  
+  <div style="text-align: center; margin-top: 20px; font-size: 11px; color: #888;">
+    <a href="/posts?page=1">&laquo; Back to list</a>
+  </div>
+</body>
+</html>
+`;
+
+    res.send(html);
+  } catch (error) {
+    console.error('Error fetching post:', error.message);
+    res.status(404).send('<html><body><h1>Error</h1><p>Post not found.</p></body></html>');
+  }
+});
+
+// Search page
+app.get('/search', (req, res) => {
+  let html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Search - e621 Proxy</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 8px; background: #fff; color: #000; }
+    .header { text-align: center; margin-bottom: 10px; padding: 5px; background: #f0f0f0; }
+    .search-box { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 3px; }
+    .search-box form { display: flex; flex-direction: column; gap: 10px; }
+    .search-box input[type="text"] { width: 100%; padding: 8px; border: 1px solid #ccc; box-sizing: border-box; }
+    .search-box button { padding: 10px; border: 1px solid #ccc; background: #f0f0f0; cursor: pointer; }
+    .nav { margin-bottom: 10px; text-align: center; }
+    .nav a { padding: 5px 10px; margin: 0 3px; border: 1px solid #ccc; text-decoration: none; color: #000; }
+    .info { font-size: 12px; color: #666; margin-top: 15px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Search e621</h1>
+  </div>
+  
+  <div class="nav">
+    <a href="/posts?page=1">Home</a>
+    <a href="/search">Search</a>
+    <a href="/random">Random</a>
+  </div>
+  
+  <div class="search-box">
+    <form action="/posts" method="get">
+      <input type="text" name="tags" placeholder="Enter tags (e.g., rating:safe furry)" required>
+      <input type="hidden" name="page" value="1">
+      <button type="submit">Search</button>
+    </form>
+    <div class="info">
+      <p><strong>Examples:</strong></p>
+      <p>rating:safe furry</p>
+      <p>rating:questionable wolf</p>
+      <p>character:sonic</p>
+      <p>artist:blotch</p>
+      <p>copyright:sonic_the_hedgehog</p>
+    </div>
+  </div>
+  
+  <div class="nav" style="margin-top: 20px;">
+    <a href="/posts?page=1">Home</a>
+    <a href="/search">Search</a>
+    <a href="/random">Random</a>
+  </div>
+</body>
+</html>
+`;
+  
+  res.send(html);
+});
+
+// Random post
+app.get('/random', async (req, res) => {
+  try {
+    res.redirect('/posts?page=' + Math.floor(Math.random() * 100) + 1);
+  } catch (error) {
+    res.status(500).send('<html><body><h1>Error</h1><p>Failed to load random post.</p></body></html>');
+  }
+});
+
+// Start server
+app.listen(PORT, () => {
+  console.log(`e621 Proxy running on port ${PORT}`);
+});
