@@ -418,13 +418,11 @@ app.get('/img/*', async (req, res) => {
     
     console.log('Proxying image:', imageUrl);
     
-    // Allow e621.net, e926.net, and common CDN domains
-    const allowedDomains = ['e621.net', 'e926.net', 'static1.e621.net', 'static2.e621.net', 'media.e621.net', 'static.e621.net'];
-    const isAllowed = allowedDomains.some(domain => imageUrl.includes(domain)) || imageUrl.includes('e621.net');
-    
-    if (!isAllowed) {
-      console.log('Blocked image URL:', imageUrl);
-      return res.status(400).send('Invalid image URL');
+    // Allow HTTPS URLs only for security
+    if (!imageUrl.startsWith('https://') && !imageUrl.startsWith('http://localhost')) {
+      console.log('Blocked non-HTTPS image URL:', imageUrl);
+      const placeholder = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=', 'base64');
+      return res.type('image/png').send(placeholder);
     }
     
     const response = await axios.get(imageUrl, {
@@ -441,7 +439,7 @@ app.get('/img/*', async (req, res) => {
   } catch (error) {
     console.error('Error proxying image:', imageUrl, error.message);
     if (error.response) {
-      console.error('Image proxy response status:', error.response.status);
+      console.error('Image proxy response status:', error.response.status, 'for URL:', imageUrl);
     }
     // Return a small transparent PNG as placeholder
     const placeholder = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=', 'base64');
