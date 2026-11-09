@@ -16,7 +16,7 @@ const e621Client = axios.create({
     'Accept-Language': 'en-US,en;q=0.9',
     'Referer': 'https://e621.net/'
   },
-  timeout: 30000,
+  timeout: 15000,
 });
 
 // Middleware
@@ -29,9 +29,41 @@ app.use((req, res, next) => {
   next();
 });
 
-// Home page - redirect to posts
+// Home page - simple landing page
 app.get('/', (req, res) => {
-  res.redirect('/posts?page=1');
+  let html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>e621 Proxy</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 8px; background: #fff; color: #000; }
+    .header { text-align: center; margin-bottom: 10px; padding: 5px; background: #f0f0f0; }
+    .nav { margin-bottom: 10px; text-align: center; }
+    .nav a { padding: 5px 10px; margin: 0 3px; border: 1px solid #ccc; text-decoration: none; color: #000; }
+    .info { text-align: center; margin-top: 20px; padding: 10px; border: 1px solid #ddd; background: #f9f9f9; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>e621 Proxy</h1>
+  </div>
+  
+  <div class="nav">
+    <a href="/posts?page=1">Home</a>
+    <a href="/search">Search</a>
+    <a href="/random">Random</a>
+  </div>
+  
+  <div class="info">
+    <p>Browse e621 on mobile browsers</p>
+    <p>Click Home to view latest posts, or Search to find specific content</p>
+  </div>
+</body>
+</html>`;
+  
+  res.send(html);
 });
 
 // Search posts
