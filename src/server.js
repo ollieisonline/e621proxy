@@ -139,7 +139,7 @@ app.get('/posts', async (req, res) => {
         html += `
   <div class="post">
     <a href="/post/${id}"><strong>Post #${id}</strong></a> - <span class="score">Score: ${score}</span>
-    <a href="/post/${id}"><img src="${imageUrl}" alt="Post ${id}"></a>
+    <a href="/post/${id}"><img src="/img/${encodeURIComponent(imageUrl)}" alt="Post ${id}" onerror="this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='"></a>
     <div class="tags">${tags}</div>
   </div>
 `;
@@ -286,7 +286,7 @@ app.get('/post/:id', async (req, res) => {
       Score: ${post.score.total} | Rating: ${post.rating} | Uploaded: ${new Date(post.created_at).toLocaleDateString()}<br>
       Size: ${post.file.width}x${post.file.height} | ${post.file.size} bytes | ${post.file.ext}
     </div>
-    <img src="${imageUrl}" alt="Post ${postId}">
+    <img src="/img/${encodeURIComponent(imageUrl)}" alt="Post ${postId}" onerror="this.src='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='">
     <div class="tags">Tags: ${tags}</div>
   </div>
   
@@ -408,6 +408,35 @@ app.get('/random', async (req, res) => {
     res.redirect('/posts?page=' + Math.floor(Math.random() * 100) + 1);
   } catch (error) {
     res.status(500).send('<html><body><h1>Error</h1><p>Failed to load random post.</p></body></html>');
+  }
+});
+
+// Image proxy to bypass e621 hotlink protection
+app.get('/img/*', async (req, res) => {
+  try {
+    const imageUrl = decodeURIComponent(req.params[0]);
+    
+    // Only allow proxying from e621 CDN domains
+    if (!imageUrl.includes('e621.net') && !imageUrl.includes('e926.net')) {
+      return res.status(400).send('Invalid image URL');
+    }
+    
+    const response = await axios.get(imageUrl, {
+      responseType: 'arraybuffer',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        'Referer': 'https://e621.net/'
+      },
+      timeout: 30000
+    });
+    
+    res.type(response.headers['content-type'] || 'image/jpeg');
+    res.send(response.data);
+  } catch (error) {
+    console.error('Error proxying image:', error.message);
+    // Return a small transparent PNG as placeholder
+    const placeholder = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=', 'base64');
+    res.type('image/png').send(placeholder);
   }
 });
 
