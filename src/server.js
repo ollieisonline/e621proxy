@@ -7,6 +7,18 @@ const PORT = process.env.PORT || 3000;
 // e621 API base URL
 const E621_API = 'https://e621.net';
 
+// Configure axios with default headers for e621
+const e621Client = axios.create({
+  baseURL: E621_API,
+  headers: {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+    'Accept': 'application/json, text/javascript, */*; q=0.01',
+    'Accept-Language': 'en-US,en;q=0.9',
+    'Referer': 'https://e621.net/'
+  },
+  timeout: 15000,
+});
+
 // Middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
@@ -29,19 +41,15 @@ app.get('/posts', async (req, res) => {
     const limit = parseInt(req.query.limit) || 20;
     const tags = req.query.tags || '';
     
-    let apiUrl = `${E621_API}/posts.json?page=${page}&limit=${limit}`;
+    let apiUrl = `/posts.json?page=${page}&limit=${limit}`;
     
     if (tags) {
       apiUrl += `&tags=${encodeURIComponent(tags)}`;
     }
     
-    const response = await axios.get(apiUrl, {
-      headers: {
-        'User-Agent': 'e621-proxy/1.0'
-      }
-    });
+    const response = await e621Client.get(apiUrl);
     
-    const posts = response.data;
+    const posts = response.data.posts || [];
     
     // Generate simple HTML for old browsers
     let html = `<!DOCTYPE html>
@@ -136,7 +144,63 @@ app.get('/posts', async (req, res) => {
     res.send(html);
   } catch (error) {
     console.error('Error fetching posts:', error.message);
-    res.status(500).send('<html><body><h1>Error</h1><p>Failed to load posts.</p></body></html>');
+    if (error.response) {
+      console.error('Response status:', error.response.status);
+      console.error('Response data:', error.response.data);
+    }
+    
+    // Generate error page with search bar so user can still navigate
+    let html = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Error - e621 Proxy</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 8px; background: #fff; color: #000; }
+    .header { text-align: center; margin-bottom: 10px; padding: 5px; background: #f0f0f0; }
+    .error { color: #d00; padding: 10px; border: 1px solid #d00; background: #fee; margin: 10px 0; }
+    .search { margin-bottom: 10px; text-align: center; }
+    .search input { width: 70%; padding: 5px; border: 1px solid #ccc; }
+    .search button { padding: 5px 10px; border: 1px solid #ccc; cursor: pointer; }
+    .nav { margin-bottom: 10px; text-align: center; }
+    .nav a { padding: 5px 10px; margin: 0 3px; border: 1px solid #ccc; text-decoration: none; color: #000; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>e621 Proxy</h1>
+  </div>
+  
+  <div class="nav">
+    <a href="/posts?page=1">Home</a>
+    <a href="/search">Search</a>
+    <a href="/random">Random</a>
+  </div>
+  
+  <div class="search">
+    <form action="/posts" method="get">
+      <input type="text" name="tags" placeholder="Search tags...">
+      <input type="hidden" name="page" value="1">
+      <button type="submit">Search</button>
+    </form>
+  </div>
+  
+  <div class="error">
+    <strong>Error:</strong> Failed to load posts. ${error.message}
+    ${error.response ? `<br>Status: ${error.response.status}` : ''}
+    <br><br>Try again in a moment, or check if e621 is accessible.
+  </div>
+  
+  <div class="nav" style="margin-top: 20px;">
+    <a href="/posts?page=1">Home</a>
+    <a href="/search">Search</a>
+    <a href="/random">Random</a>
+  </div>
+</body>
+</html>`;
+    
+    res.status(500).send(html);
   }
 });
 
@@ -144,13 +208,9 @@ app.get('/posts', async (req, res) => {
 app.get('/post/:id', async (req, res) => {
   try {
     const postId = req.params.id;
-    const response = await axios.get(`${E621_API}/posts/${postId}.json`, {
-      headers: {
-        'User-Agent': 'e621-proxy/1.0'
-      }
-    });
+    const response = await e621Client.get(`/posts/${postId}.json`);
     
-    const post = response.data;
+    const post = response.data.post;
     const tags = post.tags.general.join(' ') + ' ' + post.tags.artist.join(' ') + ' ' + post.tags.character.join(' ') + ' ' + post.tags.copyright.join(' ');
     const imageUrl = post.file.url || post.preview.url;
     
@@ -208,7 +268,40 @@ app.get('/post/:id', async (req, res) => {
     res.send(html);
   } catch (error) {
     console.error('Error fetching post:', error.message);
-    res.status(404).send('<html><body><h1>Error</h1><p>Post not found.</p></body></html>');
+    if (error.response) {
+      console.error('Response status:', error.response.status);
+    }
+    res.status(404).send(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Error - e621 Proxy</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 8px; background: #fff; color: #000; }
+    .header { text-align: center; margin-bottom: 10px; padding: 5px; background: #f0f0f0; }
+    .error { color: #d00; padding: 10px; border: 1px solid #d00; background: #fee; margin: 10px 0; }
+    .nav { margin-bottom: 10px; text-align: center; }
+    .nav a { padding: 5px 10px; margin: 0 3px; border: 1px solid #ccc; text-decoration: none; color: #000; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>e621 Proxy</h1>
+  </div>
+  
+  <div class="nav">
+    <a href="/posts?page=1">Home</a>
+    <a href="/search">Search</a>
+    <a href="/random">Random</a>
+  </div>
+  
+  <div class="error">
+    <strong>Error:</strong> Post not found or unable to load. ${error.message}
+    <br><br><a href="/posts?page=1">&laquo; Back to list</a>
+  </div>
+</body>
+</html>`);
   }
 });
 
