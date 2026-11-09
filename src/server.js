@@ -416,8 +416,14 @@ app.get('/img/*', async (req, res) => {
   try {
     const imageUrl = decodeURIComponent(req.params[0]);
     
-    // Only allow proxying from e621 CDN domains
-    if (!imageUrl.includes('e621.net') && !imageUrl.includes('e926.net')) {
+    console.log('Proxying image:', imageUrl);
+    
+    // Allow e621.net, e926.net, and common CDN domains
+    const allowedDomains = ['e621.net', 'e926.net', 'static1.e621.net', 'static2.e621.net', 'media.e621.net', 'static.e621.net'];
+    const isAllowed = allowedDomains.some(domain => imageUrl.includes(domain)) || imageUrl.includes('e621.net');
+    
+    if (!isAllowed) {
+      console.log('Blocked image URL:', imageUrl);
       return res.status(400).send('Invalid image URL');
     }
     
@@ -433,7 +439,10 @@ app.get('/img/*', async (req, res) => {
     res.type(response.headers['content-type'] || 'image/jpeg');
     res.send(response.data);
   } catch (error) {
-    console.error('Error proxying image:', error.message);
+    console.error('Error proxying image:', imageUrl, error.message);
+    if (error.response) {
+      console.error('Image proxy response status:', error.response.status);
+    }
     // Return a small transparent PNG as placeholder
     const placeholder = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=', 'base64');
     res.type('image/png').send(placeholder);
