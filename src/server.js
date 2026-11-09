@@ -100,7 +100,7 @@ app.get('/posts', async (req, res) => {
     .search input { width: 70%; padding: 5px; border: 1px solid #2a2a4a; background: #0a0a1a; color: #e0e0e0; }
     .search button { padding: 5px 10px; border: 1px solid #2a2a4a; cursor: pointer; background: #0a0a1a; color: #4da6ff; }
     .post { margin-bottom: 15px; padding: 8px; border: 1px solid #2a2a4a; border-radius: 3px; background: #0a0a1a; }
-    .post img { max-width: 100%; height: auto; display: block; margin: 5px 0; background: #0a0a1a; }
+    .post img { max-width: 100%; max-height: 70vh; height: auto; display: block; margin: 5px 0; background: #0a0a1a; }
     .post .tags { font-size: 12px; color: #88aacc; margin-top: 5px; word-wrap: break-word; }
     .post .score { font-size: 11px; color: #6688cc; }
     .post a { color: #4da6ff; text-decoration: none; }
@@ -270,7 +270,7 @@ app.get('/post/:id', async (req, res) => {
     .header { text-align: center; margin-bottom: 10px; padding: 5px; background: #0a0a1a; border-bottom: 1px solid #2a2a4a; }
     .header h1 { color: #4da6ff; margin: 0; }
     .post { margin-bottom: 15px; padding: 8px; border: 1px solid #2a2a4a; border-radius: 3px; background: #0a0a1a; }
-    .post img { max-width: 100%; height: auto; display: block; margin: 5px 0; background: #0a0a1a; }
+    .post img { max-width: 100%; max-height: 70vh; height: auto; display: block; margin: 5px 0; background: #0a0a1a; }
     .post .info { margin-top: 10px; font-size: 12px; color: #88aacc; }
     .post .tags { font-size: 12px; color: #88aacc; margin-top: 10px; word-wrap: break-word; }
     .nav { margin-bottom: 10px; text-align: center; }
