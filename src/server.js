@@ -38,11 +38,13 @@ app.get('/', (req, res) => {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>e621 Proxy</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 8px; background: #fff; color: #000; }
-    .header { text-align: center; margin-bottom: 10px; padding: 5px; background: #f0f0f0; }
+    body { font-family: Arial, sans-serif; margin: 0; padding: 8px; background: #1a1a2e; color: #e0e0e0; }
+    .header { text-align: center; margin-bottom: 10px; padding: 5px; background: #0a0a1a; border-bottom: 1px solid #2a2a4a; }
+    .header h1 { color: #4da6ff; margin: 0; }
     .nav { margin-bottom: 10px; text-align: center; }
-    .nav a { padding: 5px 10px; margin: 0 3px; border: 1px solid #ccc; text-decoration: none; color: #000; }
-    .info { text-align: center; margin-top: 20px; padding: 10px; border: 1px solid #ddd; background: #f9f9f9; }
+    .nav a { padding: 5px 10px; margin: 0 3px; border: 1px solid #2a2a4a; text-decoration: none; color: #4da6ff; background: #0a0a1a; }
+    .nav a:hover { background: #2a2a4a; }
+    .info { text-align: center; margin-top: 20px; padding: 10px; border: 1px solid #2a2a4a; background: #0a0a1a; color: #c0c0c0; }
   </style>
 </head>
 <body>
@@ -91,20 +93,23 @@ app.get('/posts', async (req, res) => {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>e621 Proxy - Page ${page}</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 8px; background: #fff; color: #000; }
-    .header { text-align: center; margin-bottom: 10px; padding: 5px; background: #f0f0f0; }
+    body { font-family: Arial, sans-serif; margin: 0; padding: 8px; background: #1a1a2e; color: #e0e0e0; }
+    .header { text-align: center; margin-bottom: 10px; padding: 5px; background: #0a0a1a; border-bottom: 1px solid #2a2a4a; }
+    .header h1 { color: #4da6ff; margin: 0; }
     .search { margin-bottom: 10px; text-align: center; }
-    .search input { width: 70%; padding: 5px; border: 1px solid #ccc; }
-    .search button { padding: 5px 10px; border: 1px solid #ccc; cursor: pointer; }
-    .post { margin-bottom: 15px; padding: 8px; border: 1px solid #ddd; border-radius: 3px; }
-    .post img { max-width: 100%; height: auto; display: block; margin: 5px 0; }
-    .post .tags { font-size: 12px; color: #666; margin-top: 5px; word-wrap: break-word; }
-    .post .score { font-size: 11px; color: #888; }
+    .search input { width: 70%; padding: 5px; border: 1px solid #2a2a4a; background: #0a0a1a; color: #e0e0e0; }
+    .search button { padding: 5px 10px; border: 1px solid #2a2a4a; cursor: pointer; background: #0a0a1a; color: #4da6ff; }
+    .post { margin-bottom: 15px; padding: 8px; border: 1px solid #2a2a4a; border-radius: 3px; background: #0a0a1a; }
+    .post img { max-width: 100%; height: auto; display: block; margin: 5px 0; background: #0a0a1a; }
+    .post .tags { font-size: 12px; color: #88aacc; margin-top: 5px; word-wrap: break-word; }
+    .post .score { font-size: 11px; color: #6688cc; }
+    .post a { color: #4da6ff; text-decoration: none; }
     .pagination { text-align: center; margin: 15px 0; }
-    .pagination a { padding: 5px 10px; margin: 0 3px; border: 1px solid #ccc; text-decoration: none; color: #000; }
-    .pagination a:hover { background: #f0f0f0; }
+    .pagination a { padding: 5px 10px; margin: 0 3px; border: 1px solid #2a2a4a; text-decoration: none; color: #4da6ff; background: #0a0a1a; }
+    .pagination a:hover { background: #2a2a4a; }
     .nav { margin-bottom: 10px; text-align: center; }
-    .nav a { padding: 5px 10px; margin: 0 3px; border: 1px solid #ccc; text-decoration: none; color: #000; }
+    .nav a { padding: 5px 10px; margin: 0 3px; border: 1px solid #2a2a4a; text-decoration: none; color: #4da6ff; background: #0a0a1a; }
+    .nav a:hover { background: #2a2a4a; }
   </style>
 </head>
 <body>
@@ -196,14 +201,16 @@ app.get('/posts', async (req, res) => {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Error - e621 Proxy</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 8px; background: #fff; color: #000; }
-    .header { text-align: center; margin-bottom: 10px; padding: 5px; background: #f0f0f0; }
-    .error { color: #d00; padding: 10px; border: 1px solid #d00; background: #fee; margin: 10px 0; }
+    body { font-family: Arial, sans-serif; margin: 0; padding: 8px; background: #1a1a2e; color: #e0e0e0; }
+    .header { text-align: center; margin-bottom: 10px; padding: 5px; background: #0a0a1a; border-bottom: 1px solid #2a2a4a; }
+    .header h1 { color: #4da6ff; margin: 0; }
+    .error { color: #ff6b6b; padding: 10px; border: 1px solid #ff6b6b; background: #2a0a0a; margin: 10px 0; }
     .search { margin-bottom: 10px; text-align: center; }
-    .search input { width: 70%; padding: 5px; border: 1px solid #ccc; }
-    .search button { padding: 5px 10px; border: 1px solid #ccc; cursor: pointer; }
+    .search input { width: 70%; padding: 5px; border: 1px solid #2a2a4a; background: #0a0a1a; color: #e0e0e0; }
+    .search button { padding: 5px 10px; border: 1px solid #2a2a4a; cursor: pointer; background: #0a0a1a; color: #4da6ff; }
     .nav { margin-bottom: 10px; text-align: center; }
-    .nav a { padding: 5px 10px; margin: 0 3px; border: 1px solid #ccc; text-decoration: none; color: #000; }
+    .nav a { padding: 5px 10px; margin: 0 3px; border: 1px solid #2a2a4a; text-decoration: none; color: #4da6ff; background: #0a0a1a; }
+    .nav a:hover { background: #2a2a4a; }
   </style>
 </head>
 <body>
@@ -259,14 +266,16 @@ app.get('/post/:id', async (req, res) => {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Post #${postId} - e621 Proxy</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 8px; background: #fff; color: #000; }
-    .header { text-align: center; margin-bottom: 10px; padding: 5px; background: #f0f0f0; }
-    .post { margin-bottom: 15px; padding: 8px; border: 1px solid #ddd; border-radius: 3px; }
-    .post img { max-width: 100%; height: auto; display: block; margin: 5px 0; }
-    .post .info { margin-top: 10px; font-size: 12px; }
-    .post .tags { font-size: 12px; color: #666; margin-top: 10px; word-wrap: break-word; }
+    body { font-family: Arial, sans-serif; margin: 0; padding: 8px; background: #1a1a2e; color: #e0e0e0; }
+    .header { text-align: center; margin-bottom: 10px; padding: 5px; background: #0a0a1a; border-bottom: 1px solid #2a2a4a; }
+    .header h1 { color: #4da6ff; margin: 0; }
+    .post { margin-bottom: 15px; padding: 8px; border: 1px solid #2a2a4a; border-radius: 3px; background: #0a0a1a; }
+    .post img { max-width: 100%; height: auto; display: block; margin: 5px 0; background: #0a0a1a; }
+    .post .info { margin-top: 10px; font-size: 12px; color: #88aacc; }
+    .post .tags { font-size: 12px; color: #88aacc; margin-top: 10px; word-wrap: break-word; }
     .nav { margin-bottom: 10px; text-align: center; }
-    .nav a { padding: 5px 10px; margin: 0 3px; border: 1px solid #ccc; text-decoration: none; color: #000; }
+    .nav a { padding: 5px 10px; margin: 0 3px; border: 1px solid #2a2a4a; text-decoration: none; color: #4da6ff; background: #0a0a1a; }
+    .nav a:hover { background: #2a2a4a; }
   </style>
 </head>
 <body>
@@ -316,11 +325,14 @@ app.get('/post/:id', async (req, res) => {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Error - e621 Proxy</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 8px; background: #fff; color: #000; }
-    .header { text-align: center; margin-bottom: 10px; padding: 5px; background: #f0f0f0; }
-    .error { color: #d00; padding: 10px; border: 1px solid #d00; background: #fee; margin: 10px 0; }
+    body { font-family: Arial, sans-serif; margin: 0; padding: 8px; background: #1a1a2e; color: #e0e0e0; }
+    .header { text-align: center; margin-bottom: 10px; padding: 5px; background: #0a0a1a; border-bottom: 1px solid #2a2a4a; }
+    .header h1 { color: #4da6ff; margin: 0; }
+    .error { color: #ff6b6b; padding: 10px; border: 1px solid #ff6b6b; background: #2a0a0a; margin: 10px 0; }
+    .error a { color: #4da6ff; text-decoration: none; }
     .nav { margin-bottom: 10px; text-align: center; }
-    .nav a { padding: 5px 10px; margin: 0 3px; border: 1px solid #ccc; text-decoration: none; color: #000; }
+    .nav a { padding: 5px 10px; margin: 0 3px; border: 1px solid #2a2a4a; text-decoration: none; color: #4da6ff; background: #0a0a1a; }
+    .nav a:hover { background: #2a2a4a; }
   </style>
 </head>
 <body>
@@ -352,15 +364,17 @@ app.get('/search', (req, res) => {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Search - e621 Proxy</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 8px; background: #fff; color: #000; }
-    .header { text-align: center; margin-bottom: 10px; padding: 5px; background: #f0f0f0; }
-    .search-box { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 3px; }
+    body { font-family: Arial, sans-serif; margin: 0; padding: 8px; background: #1a1a2e; color: #e0e0e0; }
+    .header { text-align: center; margin-bottom: 10px; padding: 5px; background: #0a0a1a; border-bottom: 1px solid #2a2a4a; }
+    .header h1 { color: #4da6ff; margin: 0; }
+    .search-box { margin: 20px 0; padding: 15px; border: 1px solid #2a2a4a; border-radius: 3px; background: #0a0a1a; }
     .search-box form { display: flex; flex-direction: column; gap: 10px; }
-    .search-box input[type="text"] { width: 100%; padding: 8px; border: 1px solid #ccc; box-sizing: border-box; }
-    .search-box button { padding: 10px; border: 1px solid #ccc; background: #f0f0f0; cursor: pointer; }
+    .search-box input[type="text"] { width: 100%; padding: 8px; border: 1px solid #2a2a4a; box-sizing: border-box; background: #1a1a2e; color: #e0e0e0; }
+    .search-box button { padding: 10px; border: 1px solid #2a2a4a; background: #0a0a1a; cursor: pointer; color: #4da6ff; }
     .nav { margin-bottom: 10px; text-align: center; }
-    .nav a { padding: 5px 10px; margin: 0 3px; border: 1px solid #ccc; text-decoration: none; color: #000; }
-    .info { font-size: 12px; color: #666; margin-top: 15px; }
+    .nav a { padding: 5px 10px; margin: 0 3px; border: 1px solid #2a2a4a; text-decoration: none; color: #4da6ff; background: #0a0a1a; }
+    .nav a:hover { background: #2a2a4a; }
+    .info { font-size: 12px; color: #88aacc; margin-top: 15px; }
   </style>
 </head>
 <body>
@@ -407,7 +421,36 @@ app.get('/random', async (req, res) => {
   try {
     res.redirect('/posts?page=' + Math.floor(Math.random() * 100) + 1);
   } catch (error) {
-    res.status(500).send('<html><body><h1>Error</h1><p>Failed to load random post.</p></body></html>');
+    res.status(500).send(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Error - e621 Proxy</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; padding: 8px; background: #1a1a2e; color: #e0e0e0; }
+    .header { text-align: center; margin-bottom: 10px; padding: 5px; background: #0a0a1a; border-bottom: 1px solid #2a2a4a; }
+    .header h1 { color: #4da6ff; margin: 0; }
+    .error { color: #ff6b6b; padding: 10px; border: 1px solid #ff6b6b; background: #2a0a0a; margin: 10px 0; }
+    .nav { margin-bottom: 10px; text-align: center; }
+    .nav a { padding: 5px 10px; margin: 0 3px; border: 1px solid #2a2a4a; text-decoration: none; color: #4da6ff; background: #0a0a1a; }
+    .nav a:hover { background: #2a2a4a; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>e621 Proxy</h1>
+  </div>
+  <div class="nav">
+    <a href="/posts?page=1">Home</a>
+    <a href="/search">Search</a>
+    <a href="/random">Random</a>
+  </div>
+  <div class="error">
+    <strong>Error:</strong> Failed to load random post.
+  </div>
+</body>
+</html>`);
   }
 });
 
